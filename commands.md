@@ -180,6 +180,16 @@ In blocking way :
 - INFO consumers stream1
 - XDEL stream1 msgID
 
+BITMAP
+- SETBIT key offset value
+    - on a map 20x20 : x9y0 is offset 9, x9y1 is 29.
+    - if I set 9 and 29 to 1, all other bits up to 28 will be filled by 0. 
+- GETBIT key offset
+- BITCOUNT key
+
+
+
+
 RDB :
 - SAVE
 - BGSAVE
