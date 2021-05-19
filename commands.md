@@ -1,3 +1,12 @@
+/etc/init.d/redis_13468 status
+redis-cli -p 13468 info server
+memtier_benchmark -p 13468 -R --random-data
+
+10.138.0.77
+
+
+
+
 LAUNCH & CLI
 - redis-server /usr/local/etc/redis.conf
 - redis-cli (runs on port 6379 by default)  / -p PORT
