@@ -185,3 +185,11 @@ h1{
     vertical-align: bottom;
     transition: all ease 500ms;
 }
+
+.alert{
+    background-color: #cab0a9;
+    color: #772D40;
+    display: block;
+    padding: 0.5rem 1rem;
+    font-size: 1.4rem;
+}
