@@ -25,10 +25,10 @@
     }
 
     h1{
-    font-size: 6rem;
-    color: #fff;
-    text-align: center;
-}
+        font-size: 6rem;
+        color: #fff;
+        text-align: center;
+    }
 
     #container{
     position: absolute;
@@ -69,7 +69,6 @@
     .title{
         color: #04AA6D;
         padding: 14px 20px;
-        margin: 8px 0;
         border: none;
         border-radius: 4px;
     }
@@ -77,7 +76,7 @@
     #content-container{
         position: absolute;
         top: 20%;
-        left: 40%;
+        left: 43%;
         align-items: center;
         justify-content: center; 
     }
@@ -104,8 +103,7 @@
     </div>
     <div id="createroom" style="display:none;">
         <input class="sized-input" type="text" name="roomNameTxt" placeholder="Choose room"/> 
-        <input class="sized-btn" type="button" name="setRooomName" value="Create" />
-        <input class="sized-btn" type="button" name="joinRooomName" value="Join" />
+        <input class="sized-btn" type="button" name="setRooomName" value="Create/Join" />
     </div>
     <div id="sendChat" style="display:none; margin-top: 200px;">
         <input class="sized-input" type="text" name="chatTxt" placeholder="Your message"/> 
@@ -129,15 +127,6 @@
             if($('input[name=roomNameTxt]').val() != ""){
                 roomname = $('input[name=roomNameTxt]').val();
                 socket.emit('createRoom',{user:username,room:roomname});
-            }
-            $('#createroom').slideUp("slow",function(){
-                $('#sendChat').slideDown("slow");
-            });
-        });
-        $('input[name=joinRooomName]').click(function(){
-            if($('input[name=roomNameTxt]').val() != ""){
-                roomname = $('input[name=roomNameTxt]').val();
-                socket.emit('joinRooom',{room:roomname, user:username});
             }
             $('#createroom').slideUp("slow",function(){
                 $('#sendChat').slideDown("slow");

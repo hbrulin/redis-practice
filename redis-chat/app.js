@@ -18,6 +18,7 @@ sub.on("message", function (channel, data) {
         data = JSON.parse(data);
         console.log("Inside Redis_Sub: data from channel " + channel);
         io.sockets.in(channel).emit(data.method, data.data);
+        //data.method -> message
     });
 
 io.sockets.on('connection', function (socket) {
@@ -36,22 +37,9 @@ io.sockets.on('connection', function (socket) {
 
         var reply = JSON.stringify({
                 method: 'message', 
-                data: "Room Name: " + data.room + '<br/>'
+                data: "Room " + data.room +" :" + data.user +" just joined <br/>"
             });
         pub.publish(data.room,reply);
-    });
-
-    socket.on("joinRooom", function (data) {
-        console.log("Got 'joinRooom' from client , " + JSON.stringify(data));
-        sub.subscribe(data.room);
-        socket.join(data.room);
-
-        var reply = JSON.stringify({
-            method: 'message', 
-            data: data.user +" just joined room " + data.room
-        });
-        pub.publish(data.room,reply);
-
     });
 
     socket.on("sendMessage", function (data) {
