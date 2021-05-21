@@ -102,7 +102,6 @@
         $('input[name=setUsername]').click(function(){
             if($('input[name=usernameTxt]').val() != ""){
                 username = $('input[name=usernameTxt]').val();
-                //var msg = {type:'setUsername',user:username};
                 socket.emit('setUsername',{user:username});
             }
             $('#username').slideUp("slow",function(){
@@ -121,7 +120,7 @@
         $('input[name=joinRooomName]').click(function(){
             if($('input[name=roomNameTxt]').val() != ""){
                 roomname = $('input[name=roomNameTxt]').val();
-                socket.emit('joinRooom',{room:roomname});
+                socket.emit('joinRooom',{room:roomname, user:username});
             }
             $('#createroom').slideUp("slow",function(){
                 $('#sendChat').slideDown("slow");
@@ -136,7 +135,6 @@
         });
 
         socket.on('message', function(message){
-            //alert('received msg=' + message);
             content.append(message + '<br />');
         }) ;
 
