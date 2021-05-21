@@ -1,138 +1,86 @@
-var express = require('express');
-var app = express();
-var server = require('http').createServer(app);
-var bodyParser = require('body-parser');
-var io = require('socket.io')(server);
-var path = require('path');
-var redis = require('./inc/redis');
+var app = require('http').createServer(handler);
+app.listen(8088);
+var io = require('socket.io')(app);
+var redis = require('redis');
+var fs = require('fs');
 
-app.set('views', path.join(__dirname, 'views')); //we want our views to be in folder views
-app.set('view engine', 'pug'); //view template engine
-
-//configurations for the module
-app.use(express.static(path.join(__dirname, 'public'))); //folder to be our client folder. Where any stylesheets will go.
-
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
-
-var chat_history = [];
-var active_users = [];
-
-//Fetch chat history from Redis
-function fetchMessages(){
-    redis.persister.get('chat_history', function(err, reply){
-        if(reply){
-            chat_history = JSON.parse(reply);
+function handler(req,res){
+    fs.readFile(__dirname + '/index.html', function(err,data){
+        if(err){
+            res.writeHead(500);
+            return res.end('Error loading index.html');
         }
+        res.writeHead(200);
+        console.log("Listening on port 8088");
+        res.end(data);
     });
 }
 
-//Fetch active users from Redis
-function fetchUsers(){
-    redis.persister.get('active_users', function(err, reply){
-        if(reply){
-            active_users = JSON.parse(reply);
-        }
+var store = redis.createClient();   
+var pub = redis.createClient();
+var sub = redis.createClient();
+sub.on("message", function (channel, data) {
+        data = JSON.parse(data);
+        console.log("Inside Redis_Sub: data from channel " + channel + ": " + (data.sendType));
+        if (parseInt("sendToSelf".localeCompare(data.sendType)) === 0) {
+             io.emit(data.method, data.data);
+        }else if (parseInt("sendToAllConnectedClients".localeCompare(data.sendType)) === 0) {
+             io.sockets.emit(data.method, data.data);
+        }else if (parseInt("sendToAllClientsInRoom".localeCompare(data.sendType)) === 0) {
+            io.sockets.in(channel).emit(data.method, data.data);
+        }       
+
     });
-}
 
-fetchMessages();
-fetchUsers();
+io.sockets.on('connection', function (socket) {
 
-//Subscribe to necessary channels
-redis.sub.subscribe('chat_messages');
-redis.sub.subscribe('active_users');
+    sub.on("subscribe", function(channel, count) {
+        console.log("Subscribed to " + channel + ". Now subscribed to " + count + " channel(s).");
+    });
 
-//Listen for messages
-redis.sub.on('message', function(channel, message){
-    if(channel === 'chat_messages')
-    {
-        io.sockets.emit('message', JSON.parse(message));
-    }else{
-        io.sockets.emit('users', JSON.parse(message));
-    }
-});
+    socket.on("setUsername", function (data) {
+        console.log("Got 'setUsername' from client, " + JSON.stringify(data));
+        var reply = JSON.stringify({
+                method: 'message',
+                sendType: 'sendToSelf',
+                data: "You are now online"
+            });     
+    });
 
-//Handles the homepage route
-app.get('/', function(req, res){
-    res.render('index', { title: 'Chat With Pub Sub' });
-});
+    socket.on("createRoom", function (data) {
+        console.log("Got 'createRoom' from client , " + JSON.stringify(data));
+        sub.subscribe(data.room);
+        socket.join(data.room);     
 
-//Handles the chat room route
-app.get('/chat/:username', function(req, res){
-    res.render('room', {user: req.params.username})
-});
-
-//Return message history
-app.get('/messages', function(req, res){
-    fetchMessages();
-    res.send(chat_history);
-});
-
-//Return active users
-app.get('/users', function(req, res){
-    fetchUsers();
-    res.send(active_users);
-});
-
-app.post('/user', function(req, res){
-
-    //fetch latest version of active users
-    fetchUsers();
-
-    if(active_users.indexOf(req.body.user) === -1){
-        //add user from array
-        active_users.push(req.body.user);
-
-        //persist new active user array
-        redis.persister.set('active_users', JSON.stringify(active_users));
-
-        //Announce arrival of user
-        var msg = {'message': req.body.user+" just joined the chat room", 'user': 'system'};
-        redis.pub.publish('chat_messages', JSON.stringify(msg));
-        redis.pub.publish('active_users', JSON.stringify(active_users));
-        //Fetch latest version of chat history
-        fetchMessages();
-
-        //Store message in chat history array and store
-        chat_history.push(msg);
-        redis.persister.set('chat_history', JSON.stringify(chat_history));
-
-        //send response back to client
-        res.send({'status': 200, 'message': 'User joined'});
-    }else{
-        res.send({'status': 403, 'message': 'User already exist'});
-    }
-
-    //Keep the active_user and chat_history arrays updated
-    fetchMessages();
-    fetchUsers();
-});
-
-//Create a message
-app.post('/message', function(req, res){
-
-    //Publish the new message
-    var msg = {'message': req.body.msg, 'user': req.body.user};
-
-    redis.pub.publish('chat_messages', JSON.stringify(msg));
-
-    //Fetch latest version of chat history
-    fetchMessages();
-
-    //Store message in chat history array and store
-    chat_history.push(msg);
-    redis.persister.set('chat_history', JSON.stringify(chat_history));
-
-    //send response back to client
-    res.send("Message sent");
-
-//Keep the chat_history array updated
-    fetchMessages();
-});
+        var reply = JSON.stringify({
+                method: 'message', 
+                sendType: 'sendToSelf',
+                data: "Share this room name with others to Join:" + data.room
+            });
+        pub.publish(data.room,reply);
 
 
-server.listen(3000, function(){
-    console.log("Server started");
-});
+    });
+    socket.on("joinRooom", function (data) {
+        console.log("Got 'joinRooom' from client , " + JSON.stringify(data));
+        sub.subscribe(data.room);
+        socket.join(data.room);     
+
+    });
+    socket.on("sendMessage", function (data) {
+        console.log("Got 'sendMessage' from client , " + JSON.stringify(data));
+        var reply = JSON.stringify({
+                method: 'message', 
+                sendType: 'sendToAllClientsInRoom',
+                data: data.user + ":" + data.msg 
+            });
+        pub.publish(data.room,reply);
+
+    });
+
+    socket.on('disconnect', function () {
+        sub.quit();
+        pub.publish("chatting","User is disconnected :" + socket.id);
+    });
+
+  });
