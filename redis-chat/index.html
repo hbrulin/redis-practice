@@ -36,7 +36,7 @@
     left: 40%;
     }
 
-    #container{
+    #input-container{
         position: absolute;
         top: 40%;
         left: 40%;
@@ -74,24 +74,29 @@
         border-radius: 4px;
     }
 
-    #content{
-        color: white;
-        padding: 14px 20px;
-        margin: 8px 0;
-        border: none;
-        border-radius: 4px;
+    #content-container{
+        position: absolute;
+        top: 20%;
+        left: 40%;
         align-items: center;
         justify-content: center; 
-        top:20%;
-        left: 40%;
+    }
+
+    #content{
+        width: 100%;
+        color: white;
+        align-items: center;
+        justify-content: center; 
     }
 
     </style>
 </head>
 <body>
 <h1 class="title">Chat With Redis Pub/Sub</h1>
-<div id="content"></div>
-<div id="container">
+<div id="content-container">
+    <div id="content"></div>
+</div>
+<div id="input-container">
     <br />
     <div id="username">
         <input class="sized-input" type="text" name="usernameTxt" placeholder="Choose username"/> 
@@ -102,7 +107,7 @@
         <input class="sized-btn" type="button" name="setRooomName" value="Create" />
         <input class="sized-btn" type="button" name="joinRooomName" value="Join" />
     </div>
-    <div id="sendChat" style="display:none;">
+    <div id="sendChat" style="display:none; margin-top: 200px;">
         <input class="sized-input" type="text" name="chatTxt" placeholder="Your message"/> 
         <input class="sized-btn" type="button" name="sendBtn" value="Send" />
     </div>
@@ -147,7 +152,7 @@
         });
 
         socket.on('message', function(message){
-            content.append(message + '<br />');
+            content.append(message + '<br/>');
         }) ;
 
         socket.on('disconnect', function() {

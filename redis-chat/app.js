@@ -36,7 +36,7 @@ io.sockets.on('connection', function (socket) {
 
         var reply = JSON.stringify({
                 method: 'message', 
-                data: "Room Name: " + data.room
+                data: "Room Name: " + data.room + '<br/>'
             });
         pub.publish(data.room,reply);
     });
