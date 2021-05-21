@@ -74,26 +74,38 @@
         border-radius: 4px;
     }
 
+    #content{
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 4px;
+        align-items: center;
+        justify-content: center; 
+        top:20%;
+        left: 40%;
+    }
+
     </style>
 </head>
 <body>
 <h1 class="title">Chat With Redis Pub/Sub</h1>
-<div id="container">
-<div id="username">
-    <input class="sized-input" type="text" name="usernameTxt" placeholder="Choose username"/> 
-    <input class="sized-btn" type="button" name="setUsername" value="Submit" />
-</div>
-<div id="createroom" style="display:none;">
-    <input class="sized-input" type="text" name="roomNameTxt" placeholder="Choose room"/> 
-    <input class="sized-btn" type="button" name="setRooomName" value="Create" />
-    <input class="sized-btn" type="button" name="joinRooomName" value="Join" />
-</div>
-<div id="sendChat" style="display:none;">
-    <input class="sized-input" type="text" name="chatTxt" placeholder="Your message"/> 
-    <input class="sized-btn" type="button" name="sendBtn" value="Send" />
-</div>
-<br />
 <div id="content"></div>
+<div id="container">
+    <br />
+    <div id="username">
+        <input class="sized-input" type="text" name="usernameTxt" placeholder="Choose username"/> 
+        <input class="sized-btn" type="button" name="setUsername" value="Submit" />
+    </div>
+    <div id="createroom" style="display:none;">
+        <input class="sized-input" type="text" name="roomNameTxt" placeholder="Choose room"/> 
+        <input class="sized-btn" type="button" name="setRooomName" value="Create" />
+        <input class="sized-btn" type="button" name="joinRooomName" value="Join" />
+    </div>
+    <div id="sendChat" style="display:none;">
+        <input class="sized-input" type="text" name="chatTxt" placeholder="Your message"/> 
+        <input class="sized-btn" type="button" name="sendBtn" value="Send" />
+    </div>
 </div>
 <script>    
     $(document).ready(function() {
